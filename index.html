@@ -1,0 +1,204 @@
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Limit Challenge - Grade 12</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4ff;
+    text-align: center;
+    padding: 20px;
+}
+.container {
+    background: white;
+    max-width: 650px;
+    margin: auto;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px #cccccc;
+}
+h1 { color: #4338ca; }
+input, select, button {
+    padding: 12px;
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+    font-size: 16px;
+}
+button {
+    background: #4338ca;
+    color: white;
+    cursor: pointer;
+}
+button:hover { background: #312e81; }
+.question {
+    background: #eef2ff;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    font-size: 20px;
+}
+#feedback { font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>🎯 Limit Challenge</h1>
+    <h3>Grade 12 Mathematics</h3>
+    <div id="start">
+        <p>Enter your name to start the challenge.</p>
+        <input id="studentName" placeholder="Student name">
+        <br>
+        <select id="lesson">
+            <option value="all">All Lessons</option>
+            <option value="graph">Limits from Graphs</option>
+            <option value="substitution">Limits by Substitution</option>
+            <option value="factorizing">Limits by Factorizing</option>
+        </select>
+        <br>
+        <button onclick="startGame()">Start Game 🚀</button>
+    </div>
+    <div id="game" hidden>
+        <p id="welcome"></p>
+        <p id="progress"></p>
+        <div class="question" id="question"></div>
+        <div id="answers"></div>
+        <p id="feedback"></p>
+        <button id="next" onclick="nextQuestion()" hidden>Next Question ➡️</button>
+    </div>
+    <div id="result" hidden>
+        <h2>🏆 Challenge Completed!</h2>
+        <p id="score"></p>
+        <p id="summary"></p>
+        <button onclick="location.reload()">Play Again 🔄</button>
+    </div>
+</div>
+<script>
+const questions = [
+    {
+        lesson: "graph",
+        q: "From a graph, the left-hand limit is 3 and the right-hand limit is 3. What is the limit?",
+        options: ["0", "3", "Does not exist", "6"],
+        answer: 1,
+        explanation: "The two one-sided limits are equal to 3."
+    },
+    {
+        lesson: "graph",
+        q: "From a graph, the left-hand limit is 2 and the right-hand limit is 5. What is the limit?",
+        options: ["2", "5", "7", "Does not exist"],
+        answer: 3,
+        explanation: "The one-sided limits are different, so the two-sided limit does not exist."
+    },
+    {
+        lesson: "substitution",
+        q: "Evaluate lim (x + 4) as x approaches 2.",
+        options: ["2", "4", "6", "8"],
+        answer: 2,
+        explanation: "Substitute x = 2: 2 + 4 = 6."
+    },
+    {
+        lesson: "substitution",
+        q: "Evaluate lim (x² + 1) as x approaches 3.",
+        options: ["7", "9", "10", "12"],
+        answer: 2,
+        explanation: "Substitute x = 3: 3² + 1 = 10."
+    },
+    {
+        lesson: "factorizing",
+        q: "Evaluate lim (x² - 9)/(x - 3) as x approaches 3.",
+        options: ["0", "3", "6", "Does not exist"],
+        answer: 2,
+        explanation: "Factor: (x - 3)(x + 3)/(x - 3). The limit is 3 + 3 = 6."
+    },
+    {
+        lesson: "factorizing",
+        q: "Evaluate lim (x² - 4)/(x - 2) as x approaches 2.",
+        options: ["2", "4", "0", "Does not exist"],
+        answer: 1,
+        explanation: "Factor: (x - 2)(x + 2)/(x - 2). The limit is 2 + 2 = 4."
+    }
+];
+let selectedQuestions = [];
+let current = 0;
+let correct = 0;
+let mistakes = {};
+function startGame() {
+    const name = document.getElementById("studentName").value.trim();
+    if (!name) {
+        alert("Please enter your name first.");
+        return;
+    }
+    const lesson = document.getElementById("lesson").value;
+    selectedQuestions = questions.filter(q => lesson === "all" || q.lesson === lesson);
+    selectedQuestions.sort(() => Math.random() - 0.5);
+    current = 0;
+    correct = 0;
+    mistakes = {};
+    document.getElementById("start").hidden = true;
+    document.getElementById("game").hidden = false;
+    document.getElementById("welcome").textContent = "Good luck, " + name + "!";
+    nextQuestion();
+}
+function nextQuestion() {
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("next").hidden = true;
+    if (current >= selectedQuestions.length) {
+        showResult();
+        return;
+    }
+    const q = selectedQuestions[current];
+    document.getElementById("progress").textContent =
+        "Question " + (current + 1) + " of " + selectedQuestions.length;
+    document.getElementById("question").textContent = q.q;
+    const answers = document.getElementById("answers");
+    answers.innerHTML = "";
+    q.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.style.display = "block";
+        button.style.margin = "10px auto";
+        button.onclick = () => checkAnswer(index);
+        answers.appendChild(button);
+    });
+}
+function checkAnswer(index) {
+    const q = selectedQuestions[current];
+    const buttons = document.querySelectorAll("#answers button");
+    buttons.forEach(button => button.disabled = true);
+    if (index === q.answer) {
+        correct++;
+        document.getElementById("feedback").textContent = "✅ Correct! " + q.explanation;
+    } else {
+        mistakes[q.lesson] = (mistakes[q.lesson] || 0) + 1;
+        document.getElementById("feedback").textContent =
+            "❌ Not quite. " + q.explanation;
+    }
+    current++;
+    document.getElementById("next").hidden = false;
+}
+function showResult() {
+    document.getElementById("game").hidden = true;
+    document.getElementById("result").hidden = false;
+    document.getElementById("score").textContent =
+        "Your score: " + correct + " / " + selectedQuestions.length;
+    let report = "Review these topics: ";
+    const topics = Object.keys(mistakes);
+    if (topics.length === 0) {
+        report = "Excellent work! You answered every question correctly.";
+    } else {
+        report += topics.map(t => ({
+            graph: "Limits from Graphs",
+            substitution: "Limits by Substitution",
+            factorizing: "Limits by Factorizing"
+        })[t] + " (" + mistakes[t] + " incorrect)").join(", ");
+    }
+    document.getElementById("summary").textContent = report;
+}
+</script>
+</body>
+</html>
+`
